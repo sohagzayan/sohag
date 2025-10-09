@@ -29,8 +29,8 @@ const pageVariants = {
 };
 
 const pageTransition = {
-  type: "tween",
-  ease: "anticipate",
+  type: "tween" as const,
+  ease: "anticipate" as const,
   duration: 0.4,
 };
 
@@ -51,8 +51,8 @@ const slideVariants = {
 };
 
 const slideTransition = {
-  type: "tween",
-  ease: "easeInOut",
+  type: "tween" as const,
+  ease: "easeInOut" as const,
   duration: 0.3,
 };
 
@@ -70,8 +70,8 @@ const fadeVariants = {
 };
 
 const fadeTransition = {
-  type: "tween",
-  ease: "easeInOut",
+  type: "tween" as const,
+  ease: "easeInOut" as const,
   duration: 0.2,
 };
 
@@ -163,8 +163,8 @@ export const staggerItem = {
     opacity: 1,
     y: 0,
     transition: {
-      type: "tween",
-      ease: "easeOut",
+      type: "tween" as const,
+      ease: "easeOut" as const,
       duration: 0.3,
     },
   },
@@ -180,7 +180,7 @@ export const loadingVariants = {
     opacity: 1,
     scale: 1,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 20,
     },
@@ -189,8 +189,8 @@ export const loadingVariants = {
     opacity: 0,
     scale: 0.8,
     transition: {
-      type: "tween",
-      ease: "easeInOut",
+      type: "tween" as const,
+      ease: "easeInOut" as const,
       duration: 0.2,
     },
   },
@@ -208,7 +208,7 @@ export const modalVariants = {
     scale: 1,
     y: 0,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 25,
     },
@@ -218,8 +218,8 @@ export const modalVariants = {
     scale: 0.8,
     y: 50,
     transition: {
-      type: "tween",
-      ease: "easeInOut",
+      type: "tween" as const,
+      ease: "easeInOut" as const,
       duration: 0.2,
     },
   },
@@ -255,7 +255,7 @@ export const cardHoverVariants = {
     y: -5,
     boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 20,
     },
@@ -270,7 +270,7 @@ export const buttonPressVariants = {
   tap: {
     scale: 0.95,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 400,
       damping: 17,
     },
@@ -287,16 +287,16 @@ export const navLinkVariants = {
     backgroundColor: "var(--link-color)",
     color: "white",
     transition: {
-      type: "tween",
-      ease: "easeInOut",
+      type: "tween" as const,
+      ease: "easeInOut" as const,
       duration: 0.2,
     },
   },
   hover: {
     backgroundColor: "var(--card-background-effect)",
     transition: {
-      type: "tween",
-      ease: "easeInOut",
+      type: "tween" as const,
+      ease: "easeInOut" as const,
       duration: 0.15,
     },
   },
@@ -314,7 +314,7 @@ export const toastVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 500,
       damping: 30,
     },
@@ -324,8 +324,8 @@ export const toastVariants = {
     y: 20,
     scale: 0.5,
     transition: {
-      type: "tween",
-      ease: "easeIn",
+      type: "tween" as const,
+      ease: "easeIn" as const,
       duration: 0.2,
     },
   },
@@ -336,7 +336,7 @@ export const sidebarVariants = {
   expanded: {
     width: "280px",
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 30,
     },
@@ -344,7 +344,7 @@ export const sidebarVariants = {
   collapsed: {
     width: "80px",
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 30,
     },
@@ -361,8 +361,8 @@ export const fieldFocusVariants = {
     borderColor: "var(--link-color)",
     boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
     transition: {
-      type: "tween",
-      ease: "easeOut",
+      type: "tween" as const,
+      ease: "easeOut" as const,
       duration: 0.15,
     },
   },
@@ -374,8 +374,8 @@ export const statusVariants = {
     borderColor: "#10b981",
     backgroundColor: "#f0fdf4",
     transition: {
-      type: "tween",
-      ease: "easeOut",
+      type: "tween" as const,
+      ease: "easeOut" as const,
       duration: 0.3,
     },
   },
@@ -383,8 +383,8 @@ export const statusVariants = {
     borderColor: "#ef4444",
     backgroundColor: "#fef2f2",
     transition: {
-      type: "tween",
-      ease: "easeOut",
+      type: "tween" as const,
+      ease: "easeOut" as const,
       duration: 0.3,
     },
   },
