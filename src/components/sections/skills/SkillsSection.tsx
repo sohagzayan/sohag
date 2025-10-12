@@ -1,12 +1,16 @@
 "use client";
 
-import { ALL_SKILLS, skillIconMap } from "@/components/ui/all-skills";
+import { skillIconMap } from "@/components/ui/all-skills";
 import { SkillsList } from "@/components/ui/skills";
-import React, { JSX } from "react";
+import React, { useEffect, useState } from "react";
 
 type Skill = {
+  id: string;
   name: string;
-  icon: JSX.Element;
+  category: string;
+  level: number;
+  icon?: string;
+  order: number;
 };
 
 type SkillCategory = {
@@ -14,14 +18,17 @@ type SkillCategory = {
   skills: Skill[];
 };
 
-// Replace categories definition with dynamic grouping from ALL_SKILLS
-const categories = Array.from(
-  ALL_SKILLS.reduce((acc, skill) => {
-    if (!acc.has(skill.category)) acc.set(skill.category, []);
-    acc.get(skill.category)!.push(skill);
-    return acc;
-  }, new Map<string, typeof ALL_SKILLS>())
-).map(([title, skills]) => ({ title, skills }));
+type SkillsResponse = {
+  success: boolean;
+  data: Skill[];
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+};
 
 const styles = {
   section: "w-full",
@@ -46,12 +53,131 @@ const styles = {
 };
 
 export default function SkillsSection() {
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/v1/skills');
+        const data: SkillsResponse = await response.json();
+        
+        if (data.success && data.data) {
+          setSkills(data.data);
+        } else {
+          setError('Failed to load skills');
+        }
+      } catch (err) {
+        console.error('Error fetching skills:', err);
+        setError('Failed to load skills');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSkills();
+  }, []);
+
+  // Group skills by category
+  const categories = Array.from(
+    skills.reduce((acc, skill) => {
+      if (!acc.has(skill.category)) acc.set(skill.category, []);
+      acc.get(skill.category)!.push(skill);
+      return acc;
+    }, new Map<string, Skill[]>())
+  )
+    .map(([title, skills]) => ({ title, skills }))
+    .sort((a, b) => {
+      // Sort categories in a specific order
+      const order = [
+        'PROGRAMMING LANGUAGES',
+        'LIBRARIES & FRAMEWORKS', 
+        'INFRASTRUCTURE & TOOLS',
+        'AI & MACHINE LEARNING',
+        'OTHER'
+      ];
+      return order.indexOf(a.title) - order.indexOf(b.title);
+    });
+
   const onMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.style.borderColor = "transparent";
   };
   const onMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.style.borderColor = "transparent";
   };
+
+  if (isLoading) {
+    return (
+      <section className={styles.section}>
+        <header>
+          <h1
+            className={"section-title"}
+            style={styles.headerTitleStyle}
+            data-ninja-font="doto_bold_normal_rg90b"
+          >
+            Skills{" "}
+            <span
+              className={styles.headerSubTitle}
+              style={styles.headerSubTitleStyle}
+              data-ninja-font="jetbrainsmono_regular_normal_smv0q"
+            >
+              Which I use/know
+            </span>
+          </h1>
+          <p
+            className={styles.headerDesc}
+            style={styles.headerDescStyle}
+            data-ninja-font="figtree_light_normal_rmlnd"
+          >
+            These are the technologies I've learned and worked with. This list is
+            constantly evolving as I continue to learn and grow as a developer.
+          </p>
+        </header>
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-current"></div>
+          <p className="mt-4 text-sm" style={{ color: "var(--paragraph)" }}>
+            Loading skills...
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className={styles.section}>
+        <header>
+          <h1
+            className={"section-title"}
+            style={styles.headerTitleStyle}
+            data-ninja-font="doto_bold_normal_rg90b"
+          >
+            Skills{" "}
+            <span
+              className={styles.headerSubTitle}
+              style={styles.headerSubTitleStyle}
+              data-ninja-font="jetbrainsmono_regular_normal_smv0q"
+            >
+              Which I use/know
+            </span>
+          </h1>
+          <p
+            className={styles.headerDesc}
+            style={styles.headerDescStyle}
+            data-ninja-font="figtree_light_normal_rmlnd"
+          >
+            These are the technologies I've learned and worked with. This list is
+            constantly evolving as I continue to learn and grow as a developer.
+          </p>
+        </header>
+        <div className="text-center py-8">
+          <p className="text-sm text-red-500">{error}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className={styles.section}>
@@ -88,7 +214,13 @@ export default function SkillsSection() {
           >
             &lt; {title} /&gt;
           </h3>
-          <SkillsList skills={skills.map((s) => s.name)} iconMap={skillIconMap} />
+          <SkillsList 
+            skills={skills
+              .sort((a, b) => a.order - b.order) // Sort by order field
+              .map((s) => s.name)
+            } 
+            iconMap={skillIconMap} 
+          />
         </div>
       ))}
     </section>

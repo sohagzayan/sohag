@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertTriangle, CheckCircle, Info, X } from "lucide-react";
-import { motion } from "framer-motion";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface DialogOptions {
   title: string;
@@ -299,6 +299,9 @@ export function CustomDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={`sm:max-w-md ${className}`}>
+        <VisuallyHidden>
+          <DialogTitle>{title || "Dialog"}</DialogTitle>
+        </VisuallyHidden>
         {showHeader && (
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
