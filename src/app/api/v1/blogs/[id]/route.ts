@@ -9,11 +9,12 @@ import prisma from '@/lib/prisma';
 // GET /api/v1/blogs/[id]
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const blog = await prisma.blog.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!blog) {

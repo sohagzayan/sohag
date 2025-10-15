@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,131 +7,159 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Experience, experiencesData } from "@/data/Experiences";
 import { AnimatePresence, motion } from "framer-motion";
 import { Briefcase, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+interface DatabaseExperience {
+  id: string;
+  company: string;
+  position: string;
+  description: string;
+  startDate: string;
+  endDate: string | null;
+  current: boolean;
+  location: string;
+  logo: string | null;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function AdminExperience() {
-  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [experiences, setExperiences] = useState<DatabaseExperience[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<Experience>>({
-    title: "",
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState<Partial<DatabaseExperience>>({
     company: "",
-    companyUrl: "",
+    position: "",
     location: "",
     startDate: "",
     endDate: "",
     current: false,
     description: "",
-    skills: [],
-    achievements: [],
+    logo: "",
+    order: 0,
   });
-  const [skillInput, setSkillInput] = useState("");
-  const [achievementInput, setAchievementInput] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem("admin_experiences");
-    if (saved) {
-      setExperiences(JSON.parse(saved));
-    } else {
-      setExperiences(experiencesData);
-    }
+    fetchExperiences();
   }, []);
 
-  const saveExperiences = (data: Experience[]) => {
-    setExperiences(data);
-    localStorage.setItem("admin_experiences", JSON.stringify(data));
+  const fetchExperiences = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/v1/experiences');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setExperiences(data.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching experiences:', error);
+      toast.error('Failed to load experiences');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (editingId) {
-      const updated = experiences.map((exp) =>
-        exp._id === editingId ? { ...exp, ...formData, updatedAt: new Date().toISOString() } : exp
-      );
-      saveExperiences(updated);
-      toast.success("Experience updated successfully!");
-    } else {
-      const newExp: Experience = {
-        ...formData,
-        _id: `exp_${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as Experience;
-      saveExperiences([...experiences, newExp]);
-      toast.success("Experience added successfully!");
-    }
+    try {
+      if (editingId) {
+        // Update existing experience
+        const response = await fetch(`/api/v1/experiences/${editingId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        
+        if (response.ok) {
+          toast.success("Experience updated successfully!");
+          fetchExperiences(); // Refresh the list
+        } else {
+          throw new Error('Failed to update experience');
+        }
+      } else {
+        // Create new experience
+        const response = await fetch('/api/v1/experiences', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        
+        if (response.ok) {
+          toast.success("Experience added successfully!");
+          fetchExperiences(); // Refresh the list
+        } else {
+          throw new Error('Failed to create experience');
+        }
+      }
 
-    resetForm();
-    setIsDialogOpen(false);
+      resetForm();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Error saving experience:', error);
+      toast.error('Failed to save experience');
+    }
   };
 
-  const handleEdit = (exp: Experience) => {
-    setEditingId(exp._id);
-    setFormData(exp);
+  const handleEdit = (exp: DatabaseExperience) => {
+    setEditingId(exp.id);
+    setFormData({
+      company: exp.company || "",
+      position: exp.position || "",
+      location: exp.location || "",
+      startDate: exp.startDate || "",
+      endDate: exp.endDate || "",
+      current: exp.current || false,
+      description: exp.description || "",
+      logo: exp.logo || "",
+      order: exp.order || 0,
+    });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this experience?")) {
-      saveExperiences(experiences.filter((exp) => exp._id !== id));
-      toast.success("Experience deleted successfully!");
+      try {
+        const response = await fetch(`/api/v1/experiences/${id}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          toast.success("Experience deleted successfully!");
+          fetchExperiences(); // Refresh the list
+        } else {
+          throw new Error('Failed to delete experience');
+        }
+      } catch (error) {
+        console.error('Error deleting experience:', error);
+        toast.error('Failed to delete experience');
+      }
     }
   };
 
   const resetForm = () => {
     setEditingId(null);
     setFormData({
-      title: "",
       company: "",
-      companyUrl: "",
+      position: "",
       location: "",
       startDate: "",
       endDate: "",
       current: false,
       description: "",
-      skills: [],
-      achievements: [],
-    });
-    setSkillInput("");
-    setAchievementInput("");
-  };
-
-  const addSkill = () => {
-    if (skillInput.trim() && !formData.skills?.includes(skillInput.trim())) {
-      setFormData({
-        ...formData,
-        skills: [...(formData.skills || []), skillInput.trim()],
-      });
-      setSkillInput("");
-    }
-  };
-
-  const removeSkill = (skill: string) => {
-    setFormData({
-      ...formData,
-      skills: formData.skills?.filter((s) => s !== skill),
-    });
-  };
-
-  const addAchievement = () => {
-    if (achievementInput.trim()) {
-      setFormData({
-        ...formData,
-        achievements: [...(formData.achievements || []), achievementInput.trim()],
-      });
-      setAchievementInput("");
-    }
-  };
-
-  const removeAchievement = (index: number) => {
-    setFormData({
-      ...formData,
-      achievements: formData.achievements?.filter((_, i) => i !== index),
+      logo: "",
+      order: 0,
     });
   };
 
@@ -174,11 +201,11 @@ export default function AdminExperience() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Job Title *</Label>
+                  <Label htmlFor="position">Job Title *</Label>
                   <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    id="position"
+                    value={formData.position || ""}
+                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                     required
                   />
                 </div>
@@ -186,7 +213,7 @@ export default function AdminExperience() {
                   <Label htmlFor="company">Company *</Label>
                   <Input
                     id="company"
-                    value={formData.company}
+                    value={formData.company || ""}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                     required
                   />
@@ -195,19 +222,19 @@ export default function AdminExperience() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="companyUrl">Company URL</Label>
+                  <Label htmlFor="logo">Company Logo URL</Label>
                   <Input
-                    id="companyUrl"
-                    value={formData.companyUrl}
-                    onChange={(e) => setFormData({ ...formData, companyUrl: e.target.value })}
-                    placeholder="https://example.com"
+                    id="logo"
+                    value={formData.logo || ""}
+                    onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                    placeholder="https://example.com/logo.png"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="location">Location *</Label>
                   <Input
                     id="location"
-                    value={formData.location}
+                    value={formData.location || ""}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     required
                   />
@@ -220,7 +247,7 @@ export default function AdminExperience() {
                   <Input
                     id="startDate"
                     type="date"
-                    value={formData.startDate}
+                    value={formData.startDate || ""}
                     onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                     required
                   />
@@ -230,7 +257,7 @@ export default function AdminExperience() {
                   <Input
                     id="endDate"
                     type="date"
-                    value={formData.endDate}
+                    value={formData.endDate || ""}
                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                     disabled={formData.current}
                   />
@@ -240,7 +267,7 @@ export default function AdminExperience() {
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="current"
-                  checked={formData.current}
+                  checked={formData.current || false}
                   onCheckedChange={(checked) =>
                     setFormData({ ...formData, current: checked as boolean, endDate: "" })
                   }
@@ -252,65 +279,13 @@ export default function AdminExperience() {
                 <Label htmlFor="description">Description *</Label>
                 <Textarea
                   id="description"
-                  value={formData.description}
+                  value={formData.description || ""}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={4}
                   required
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Skills</Label>
-                <div className="flex gap-2">
-                  <Input
-                    value={skillInput}
-                    onChange={(e) => setSkillInput(e.target.value)}
-                    placeholder="Add a skill"
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        addSkill();
-                      }
-                    }}
-                  />
-                  <Button type="button" onClick={addSkill}>Add</Button>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.skills?.map((skill) => (
-                    <Badge key={skill} variant="secondary" className="flex items-center gap-1">
-                      {skill}
-                      <button onClick={() => removeSkill(skill)} className="hover:text-destructive">
-                        ×
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Achievements</Label>
-                <div className="flex gap-2">
-                  <Input
-                    value={achievementInput}
-                    onChange={(e) => setAchievementInput(e.target.value)}
-                    placeholder="Add an achievement"
-                  />
-                  <Button type="button" onClick={addAchievement}>Add</Button>
-                </div>
-                <ul className="space-y-2 mt-2">
-                  {formData.achievements?.map((achievement, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <span className="flex-1">{achievement}</span>
-                      <button
-                        onClick={() => removeAchievement(index)}
-                        className="text-destructive hover:underline"
-                      >
-                        Remove
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
 
               <Button type="submit" className="w-full">
                 {editingId ? "Update" : "Add"} Experience
@@ -321,7 +296,22 @@ export default function AdminExperience() {
       </motion.div>
 
       <div className="grid gap-4">
-        {experiences.length === 0 ? (
+        {loading ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+                <p className="text-sm text-muted-foreground text-center">
+                  Loading experiences...
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : experiences.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -340,7 +330,7 @@ export default function AdminExperience() {
           <AnimatePresence mode="popLayout">
             {experiences.map((exp, index) => (
               <motion.div
-                key={exp._id}
+                key={exp.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -100 }}
@@ -351,7 +341,7 @@ export default function AdminExperience() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <CardTitle>{exp.title}</CardTitle>
+                    <CardTitle>{exp.position}</CardTitle>
                     <CardDescription>
                       {exp.company} • {exp.location}
                     </CardDescription>
@@ -363,10 +353,10 @@ export default function AdminExperience() {
                       -{" "}
                       {exp.current
                         ? "Present"
-                        : new Date(exp.endDate!).toLocaleDateString("en-US", {
+                        : exp.endDate ? new Date(exp.endDate).toLocaleDateString("en-US", {
                             month: "short",
                             year: "numeric",
-                          })}
+                          }) : "Present"}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -376,7 +366,7 @@ export default function AdminExperience() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(exp._id)}
+                      onClick={() => handleDelete(exp.id)}
                       className="text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -386,25 +376,10 @@ export default function AdminExperience() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm mb-3">{exp.description}</p>
-                {exp.skills && exp.skills.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {exp.skills.map((skill) => (
-                      <Badge key={skill} variant="secondary">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-                {exp.achievements && exp.achievements.length > 0 && (
-                  <div>
-                    <p className="text-sm font-semibold mb-2">Key Achievements:</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      {exp.achievements.map((achievement, idx) => (
-                        <li key={idx} className="text-sm text-muted-foreground">
-                          {achievement}
-                        </li>
-                      ))}
-                    </ul>
+                {exp.logo && (
+                  <div className="mt-3">
+                    <p className="text-sm font-semibold mb-1">Logo:</p>
+                    <p className="text-sm text-muted-foreground break-all">{exp.logo}</p>
                   </div>
                 )}
               </CardContent>

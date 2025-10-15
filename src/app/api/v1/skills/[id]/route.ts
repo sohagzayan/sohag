@@ -7,11 +7,12 @@ import prisma from '@/lib/prisma';
 // GET /api/v1/skills/[id] - Get a specific skill
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     try {
         const skill = await prisma.skill.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
 
         if (!skill) {
@@ -28,14 +29,15 @@ export async function GET(
 // PATCH /api/v1/skills/[id] - Update a specific skill
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     try {
         const body = await request.json();
 
         // Check if skill exists
         const existingSkill = await prisma.skill.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
 
         if (!existingSkill) {
@@ -59,7 +61,7 @@ export async function PATCH(
 
         // Update the skill
         const updatedSkill = await prisma.skill.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 ...(body.name && { name: body.name }),
                 ...(body.category && { category: body.category }),
@@ -79,12 +81,13 @@ export async function PATCH(
 // DELETE /api/v1/skills/[id] - Delete a specific skill
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     try {
         // Check if skill exists
         const existingSkill = await prisma.skill.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
 
         if (!existingSkill) {
@@ -93,7 +96,7 @@ export async function DELETE(
 
         // Delete the skill
         await prisma.skill.delete({
-            where: { id: params.id },
+            where: { id },
         });
 
         return successResponse(null, 'Skill deleted successfully');

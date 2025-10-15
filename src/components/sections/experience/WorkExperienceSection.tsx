@@ -1,204 +1,156 @@
 "use client";
 
+import { useExperiences } from "@/hooks/use-experiences";
+import { useEffect, useState } from "react";
 import { ExperienceItemType, WorkExperience } from "../../ui/work-experience";
 
-const WORK_EXPERIENCE: ExperienceItemType[] = [
-	{
-		id: "1",
-		companyName: "Samtax",
-		companyLogo: "/logos/samtax.svg",
-		isCurrentEmployer: true,
-		positions: [
-			{
-				id: "1-1",
-				title: "Full Stack Engineer",
-				employmentPeriod: "June 2024 – Present",
-				employmentType: "Full-time",
-				description:
-					`• Developed and launched multiple full-stack web applications in a fast-paced startup environment.\n\n• Built custom internal tools, AI-driven automation solutions, and secure payment systems.\n\n• Focused on scalable, robust, and secure application architecture.\n\n• Collaborated with cross-functional teams to deliver high-impact features on tight deadlines.`,
-				icon: "code",
-				skills: [
-					"React",
-					"TypeScript",
-					"Tailwind CSS",
-					"Express.js",
-					"MongoDB",
-					"Node.js",
-					"AI Integration",
-					"Payment Systems",
-					"Systems Design",
-				],
-				location: "Philadelphia, United States",
-				isExpanded: true,
-			},
-			{
-				id: "1-2",
-				title: "AI Engineer",
-				employmentPeriod: "March 2025 – Present",
-				employmentType: "Full-time",
-				description:
-					`• Built and deployed AI-powered tools to automate and optimize company operations.\n\n• Designed and implemented machine learning models for business solutions.\n\n• Collaborated with engineering teams to integrate AI features into existing products.`,
-				icon: "code",
-				skills: [
-					"AI Integration",
-					"Machine Learning",
-					"Python",
-					"TensorFlow",
-					"Data Engineering",
-					"Automation",
-					"React",
-					"TypeScript"
-				],
-				location: "Philadelphia, United States",
-				isExpanded: true,
-			},
-		],
-	},
-	{
-		id: "2",
-		companyName: "Sustainable Star LLC",
-		companyLogo: "/logos/sustainablestar.png",
-		isCurrentEmployer: false,
-		positions: [
-			{
-				id: "2-1",
-				title: "Frontend Developer",
-				employmentPeriod: "July 2023 – November 2023",
-				employmentType: "Full-time",
-				description:
-					`• Developed the Sustainable Star Form Builder platform with customizable forms and drag-and-drop functionality.\n\n• Ensured responsive design and optimized frontend performance for a seamless user experience.\n\n• Collaborated with designers and backend engineers to deliver new features and improvements.`,
-				icon: "code",
-				skills: [
-					"React.js",
-					"JavaScript ES6+",
-					"CSS3",
-					"TypeScript",
-					"Tailwind CSS",
-					"Redux Toolkit",
-					"REST APIs",
-					"Webpack",
-					"Git",
-					"Axios",
-				],
-				location: "Riyadh, Saudi Arabia",
-			},
-		],
-	},
-	{
-		id: "3",
-		companyName: "Perfect Touch (PTIT)",
-		companyLogo: "/logos/ptit.png",
-		isCurrentEmployer: false,
-		positions: [
-			{
-				id: "3-1",
-				title: "Frontend Developer",
-				employmentPeriod: "June 2023 – September 2023",
-				employmentType: "Full-time",
-				description:
-					`• Contributed to team projects including the NAJ Training Center, improving usability and creativity.\n\n• Maintained legacy projects by updating packages and optimizing code for better performance.\n\n• Worked closely with team members to deliver high-quality solutions on schedule.`,
-				icon: "code",
-				skills: [
-					"React",
-					"JavaScript",
-					"HTML5",
-					"CSS3",
-					"Legacy Code Optimization",
-					"Package Management",
-				],
-				location: "Riyadh, Saudi Arabia",
-			},
-		],
-	},
-	{
-		id: "4",
-		companyName: "Gaza Electricity Distribution Company (GEDCO)",
-		companyLogo: "/logos/gedco.png",
-		isCurrentEmployer: false,
-		positions: [
-			{
-				id: "4-1",
-				title: "IT Security & Database Intern",
-				employmentPeriod: "April 2022 – June 2022",
-				employmentType: "Internship",
-				description:
-					`• Supported database maintenance and security operations for critical infrastructure.\n\n• Implemented protocols to protect sensitive data and ensure compliance with security standards.\n\n• Participated in network security monitoring, backup systems, and disaster recovery planning.`,
-				icon: "security",
-				skills: [
-					"SQL Server Administration",
-					"MySQL",
-					"Database Security",
-					"Network Security Monitoring",
-					"Security Compliance",
-					"Vulnerability Management",
-					"Data Backup Solutions",
-				],
-				location: "Gaza, Palestine",
-			},
-		],
-	},
-	{
-		id: "5",
-		companyName: "Freelance",
-		isCurrentEmployer: false,
-		positions: [
-			{
-				id: "5-1",
-				title: "Full Stack Engineer",
-				employmentPeriod: "2022 – 2023",
-				employmentType: "Contract",
-				description:
-					`• Worked independently on various full-stack projects for clients in diverse industries.\n\n• Delivered custom web applications, API integrations, and client-specific solutions.\n\n• Managed end-to-end development including design, deployment, and maintenance.`,
-				icon: "code",
-				skills: [
-					"React",
-					"Node.js",
-					"Express.js",
-					"MongoDB",
-					"TypeScript",
-					"REST APIs",
-					"Tailwind CSS",
-				],
-				location: "Remote",
-			},
-		],
-	},
-	{
-		id: "6",
-		companyName: "Al-Azhar University",
-		companyLogo: "/logos/alazhar-logo.png",
-		isCurrentEmployer: false,
-		positions: [
-			{
-				id: "6-1",
-				title: "Software Engineering and Database Systems",
-				employmentPeriod: "2020 – 2022",
-				employmentType: "Education",
-				description:
-					`• Studied Software Engineering and Database Systems with a strong emphasis on building secure applications and robust data management.\n\n• Developed a solid foundation in modern programming practices, system architecture, and problem-solving.\n\n• Engaged in hands-on projects and collaborative learning environments.`,
-				icon: "education",
-				skills: [
-					"Software Engineering",
-					"Database Systems",
-					"Secure Applications",
-					"System Architecture",
-					"Programming Practices",
-					"Problem Solving",
-				],
-				location: "Gaza, Palestine",
-			},
-		],
-	},
-];
-
 export default function WorkSection() {
-	return (
-		<section className="w-full ibmsans">
-			<h2 className="section-title">Experience</h2>
-			<WorkExperience
-				className="rounded-lg"
-				experiences={WORK_EXPERIENCE}
-			/>
-		</section>
-	);
+  const { experiences: dbExperiences, loading: isLoading, error: fetchError, refetch } = useExperiences();
+  const [experiences, setExperiences] = useState<ExperienceItemType[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (dbExperiences && dbExperiences.length > 0) {
+      const uiExperiences = dbExperiences.map((exp) => {
+        const formatDate = (dateString: string) => {
+          const date = new Date(dateString);
+          return date.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+          });
+        };
+
+        const formatEmploymentPeriod = (startDate: string, endDate: string | undefined, current: boolean) => {
+          const start = formatDate(startDate);
+          const end = current ? "Present" : (endDate ? formatDate(endDate) : "Present");
+          return `${start} – ${end}`;
+        };
+
+        // Determine employment type based on company and position
+        const getEmploymentType = (company: string, position: string) => {
+          if (company.includes("University") || position.includes("Education")) return "Education";
+          if (company.includes("Freelance")) return "Contract";
+          if (position.includes("Intern")) return "Internship";
+          return "Full-time";
+        };
+
+        // Determine icon based on position/company
+        const getIcon = (position: string, company: string) => {
+          if (position.includes("Security") || position.includes("Database")) return "security";
+          if (company.includes("University") || position.includes("Education")) return "education";
+          return "code";
+        };
+
+        return {
+          id: exp._id,
+          companyName: exp.company,
+          companyLogo: undefined, // Logo would need to be added to database schema
+          isCurrentEmployer: exp.current,
+          positions: [
+            {
+              id: `${exp._id}-1`,
+              title: exp.title,
+              employmentPeriod: formatEmploymentPeriod(exp.startDate, exp.endDate, exp.current),
+              employmentType: getEmploymentType(exp.company, exp.title),
+              description: exp.description,
+              icon: getIcon(exp.title, exp.company),
+              skills: exp.skills || [],
+              location: exp.location,
+              isExpanded: exp.current, // Expand current job by default
+            },
+          ],
+        };
+      });
+      setExperiences(uiExperiences);
+      setError(null);
+    } else if (fetchError) {
+      setError(fetchError);
+    }
+  }, [dbExperiences, fetchError]);
+
+  if (isLoading) {
+    return (
+      <section className="w-full ibmsans">
+        <h2 className="section-title">Experience</h2>
+        <div className="space-y-6">
+          {/* Skeleton Loading Cards - matches the actual experience layout */}
+          {[1, 2, 3].map((index) => (
+            <div
+              key={index}
+              className="bg-card border border-border rounded-xl p-6 animate-pulse"
+            >
+              <div className="flex items-start gap-4">
+                {/* Company Logo Skeleton */}
+                <div className="w-12 h-12 bg-muted rounded-full flex-shrink-0"></div>
+                
+                <div className="flex-1 space-y-3">
+                  {/* Company Name Skeleton */}
+                  <div className="h-6 bg-muted rounded-md w-1/3"></div>
+                  
+                  {/* Position Skeleton */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-muted rounded-full"></div>
+                    <div className="h-5 bg-muted rounded-md w-1/2"></div>
+                  </div>
+                  
+                  {/* Employment Period Skeleton */}
+                  <div className="h-4 bg-muted rounded-md w-1/4"></div>
+                  
+                  {/* Description Skeleton */}
+                  <div className="space-y-2">
+                    <div className="h-4 bg-muted rounded-md w-full"></div>
+                    <div className="h-4 bg-muted rounded-md w-3/4"></div>
+                    <div className="h-4 bg-muted rounded-md w-1/2"></div>
+                  </div>
+                  
+                  {/* Skills Skeleton */}
+                  <div className="flex gap-2 flex-wrap">
+                    {[1, 2, 3, 4].map((skillIndex) => (
+                      <div
+                        key={skillIndex}
+                        className="h-6 bg-muted rounded-full w-16"
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Chevron Skeleton */}
+                <div className="w-6 h-6 bg-muted rounded-md"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="w-full ibmsans">
+        <h2 className="section-title">Experience</h2>
+        <div className="text-center py-8">
+          <p className="text-sm text-red-500 mb-4">{error}</p>
+          <button
+            onClick={() => {
+              setError(null);
+              refetch();
+            }}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="w-full ibmsans">
+      <h2 className="section-title">Experience</h2>
+      <WorkExperience
+        className="rounded-lg"
+        experiences={experiences}
+      />
+    </section>
+  );
 }

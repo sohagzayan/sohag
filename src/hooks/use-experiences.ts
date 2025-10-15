@@ -1,7 +1,37 @@
 "use client";
 
-import { experiencesData, type Experience } from "@/data";
 import { useCallback, useEffect, useState } from "react";
+
+interface DatabaseExperience {
+  id: string;
+  company: string;
+  position: string;
+  description: string;
+  startDate: string;
+  endDate: string | null;
+  current: boolean;
+  location: string;
+  logo: string | null;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Experience {
+  _id: string;
+  title: string;
+  company: string;
+  companyUrl?: string;
+  location: string;
+  startDate: string;
+  endDate?: string;
+  current: boolean;
+  description: string;
+  skills: string[];
+  achievements?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface UseExperiencesOptions {
   current?: boolean;
@@ -13,6 +43,24 @@ interface UseExperiencesReturn {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
+}
+
+// Transform database experience to UI format
+function transformDatabaseToExperience(dbExperience: DatabaseExperience): Experience {
+  return {
+    _id: dbExperience.id,
+    title: dbExperience.position,
+    company: dbExperience.company,
+    location: dbExperience.location,
+    startDate: dbExperience.startDate,
+    endDate: dbExperience.endDate || undefined,
+    current: dbExperience.current,
+    description: dbExperience.description,
+    skills: [], // Skills would need to be added to database schema or handled separately
+    achievements: [], // Achievements would need to be added to database schema or handled separately
+    createdAt: dbExperience.createdAt,
+    updatedAt: dbExperience.updatedAt,
+  };
 }
 
 export function useExperiences(
@@ -27,30 +75,34 @@ export function useExperiences(
       setLoading(true);
       setError(null);
 
-      // Simulate loading delay for better UX
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      let filteredData = [...experiencesData];
-
-      // Apply filters
+      // Build query parameters
+      const params = new URLSearchParams();
       if (options.current !== undefined) {
-        filteredData = filteredData.filter(
-          (exp) => exp.current === options.current
-        );
+        params.append('current', options.current.toString());
       }
-
-      // Apply limit
       if (options.limit) {
-        filteredData = filteredData.slice(0, options.limit);
+        params.append('limit', options.limit.toString());
       }
 
-      // Sort by start date (newest first)
-      filteredData.sort(
-        (a, b) =>
-          new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-      );
+      const response = await fetch(`/api/v1/experiences?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-      setExperiences(filteredData);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        const transformedExperiences = data.data.map(transformDatabaseToExperience);
+        setExperiences(transformedExperiences);
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (err) {
       console.error("Error loading experiences:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
