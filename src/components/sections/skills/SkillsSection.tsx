@@ -2,7 +2,8 @@
 
 import { skillIconMap } from "@/components/ui/all-skills";
 import { SkillsList } from "@/components/ui/skills";
-import React, { useEffect, useState } from "react";
+import { useInstantSkills } from "@/hooks/use-instant-data";
+import React from "react";
 
 type Skill = {
   id: string;
@@ -53,32 +54,7 @@ const styles = {
 };
 
 export default function SkillsSection() {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchSkills = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch('/api/v1/skills');
-        const data: SkillsResponse = await response.json();
-        
-        if (data.success && data.data) {
-          setSkills(data.data);
-        } else {
-          setError('Failed to load skills');
-        }
-      } catch (err) {
-        console.error('Error fetching skills:', err);
-        setError('Failed to load skills');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSkills();
-  }, []);
+  const { data: skills, isUpdating, error } = useInstantSkills();
 
   // Group skills by category
   const categories = Array.from(
@@ -108,42 +84,6 @@ export default function SkillsSection() {
     e.currentTarget.style.borderColor = "transparent";
   };
 
-  if (isLoading) {
-    return (
-      <section className={styles.section}>
-        <header>
-          <h1
-            className={"section-title"}
-            style={styles.headerTitleStyle}
-            data-ninja-font="doto_bold_normal_rg90b"
-          >
-            Skills{" "}
-            <span
-              className={styles.headerSubTitle}
-              style={styles.headerSubTitleStyle}
-              data-ninja-font="jetbrainsmono_regular_normal_smv0q"
-            >
-              Which I use/know
-            </span>
-          </h1>
-          <p
-            className={styles.headerDesc}
-            style={styles.headerDescStyle}
-            data-ninja-font="figtree_light_normal_rmlnd"
-          >
-            These are the technologies I've learned and worked with. This list is
-            constantly evolving as I continue to learn and grow as a developer.
-          </p>
-        </header>
-        <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-current"></div>
-          <p className="mt-4 text-sm" style={{ color: "var(--paragraph)" }}>
-            Loading skills...
-          </p>
-        </div>
-      </section>
-    );
-  }
 
   if (error) {
     return (

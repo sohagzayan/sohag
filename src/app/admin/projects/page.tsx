@@ -7,80 +7,141 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Project, projectsData } from "@/data/Projects";
 import { AnimatePresence, motion } from "framer-motion";
 import { FolderOpen, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+interface DatabaseProject {
+  id: string;
+  title: string;
+  description: string;
+  image: string | null;
+  link: string | null;
+  tags: string[];
+  featured: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function AdminProjects() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<DatabaseProject[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<Project>>({
+  const [formData, setFormData] = useState<Partial<DatabaseProject>>({
     title: "",
     description: "",
-    projectType: "Web Application",
-    websiteUrl: "",
-    githubUrl: "",
-    videoUrl: "",
-    technologies: [],
+    image: "",
+    link: "",
+    tags: [],
     featured: false,
-    status: "Published",
-    images: [],
+    order: 0,
   });
   const [techInput, setTechInput] = useState("");
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const saved = localStorage.getItem("admin_projects");
-    if (saved) {
-      setProjects(JSON.parse(saved));
-    } else {
-      setProjects(projectsData);
-    }
+    fetchProjects();
   }, []);
 
-  const saveProjects = (data: Project[]) => {
-    setProjects(data);
-    localStorage.setItem("admin_projects", JSON.stringify(data));
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/v1/projects');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setProjects(data.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      toast.error('Failed to load projects');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (editingId) {
-      const updated = projects.map((proj) =>
-        proj._id === editingId ? { ...proj, ...formData, updatedAt: new Date().toISOString() } : proj
-      );
-      saveProjects(updated);
-      toast.success("Project updated successfully!");
-    } else {
-      const newProj: Project = {
-        ...formData,
-        _id: `proj_${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as Project;
-      saveProjects([...projects, newProj]);
-      toast.success("Project added successfully!");
-    }
+    try {
+      if (editingId) {
+        // Update existing project
+        const response = await fetch(`/api/v1/projects/${editingId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        
+        if (response.ok) {
+          toast.success("Project updated successfully!");
+          fetchProjects(); // Refresh the list
+        } else {
+          throw new Error('Failed to update project');
+        }
+      } else {
+        // Create new project
+        const response = await fetch('/api/v1/projects', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        
+        if (response.ok) {
+          toast.success("Project added successfully!");
+          fetchProjects(); // Refresh the list
+        } else {
+          throw new Error('Failed to create project');
+        }
+      }
 
-    resetForm();
-    setIsDialogOpen(false);
+      resetForm();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Error saving project:', error);
+      toast.error('Failed to save project');
+    }
   };
 
-  const handleEdit = (proj: Project) => {
-    setEditingId(proj._id);
-    setFormData(proj);
+  const handleEdit = (proj: DatabaseProject) => {
+    setEditingId(proj.id);
+    setFormData({
+      title: proj.title || "",
+      description: proj.description || "",
+      image: proj.image || "",
+      link: proj.link || "",
+      tags: proj.tags || [],
+      featured: proj.featured || false,
+      order: proj.order || 0,
+    });
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this project?")) {
-      saveProjects(projects.filter((proj) => proj._id !== id));
-      toast.success("Project deleted successfully!");
+      try {
+        const response = await fetch(`/api/v1/projects/${id}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          toast.success("Project deleted successfully!");
+          fetchProjects(); // Refresh the list
+        } else {
+          throw new Error('Failed to delete project');
+        }
+      } catch (error) {
+        console.error('Error deleting project:', error);
+        toast.error('Failed to delete project');
+      }
     }
   };
 
@@ -89,23 +150,20 @@ export default function AdminProjects() {
     setFormData({
       title: "",
       description: "",
-      projectType: "Web Application",
-      websiteUrl: "",
-      githubUrl: "",
-      videoUrl: "",
-      technologies: [],
+      image: "",
+      link: "",
+      tags: [],
       featured: false,
-      status: "Published",
-      images: [],
+      order: 0,
     });
     setTechInput("");
   };
 
   const addTechnology = () => {
-    if (techInput.trim() && !formData.technologies?.includes(techInput.trim())) {
+    if (techInput.trim() && !formData.tags?.includes(techInput.trim())) {
       setFormData({
         ...formData,
-        technologies: [...(formData.technologies || []), techInput.trim()],
+        tags: [...(formData.tags || []), techInput.trim()],
       });
       setTechInput("");
     }
@@ -114,7 +172,7 @@ export default function AdminProjects() {
   const removeTechnology = (tech: string) => {
     setFormData({
       ...formData,
-      technologies: formData.technologies?.filter((t) => t !== tech),
+      tags: formData.tags?.filter((t) => t !== tech),
     });
   };
 
@@ -158,7 +216,7 @@ export default function AdminProjects() {
                 <Label htmlFor="title">Project Title *</Label>
                 <Input
                   id="title"
-                  value={formData.title}
+                  value={formData.title || ""}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
                 />
@@ -168,7 +226,7 @@ export default function AdminProjects() {
                 <Label htmlFor="description">Description *</Label>
                 <Textarea
                   id="description"
-                  value={formData.description}
+                  value={formData.description || ""}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={4}
                   required
@@ -177,72 +235,47 @@ export default function AdminProjects() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="projectType">Project Type</Label>
-                  <Select
-                    value={formData.projectType}
-                    onValueChange={(value) => setFormData({ ...formData, projectType: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Web Application">Web Application</SelectItem>
-                      <SelectItem value="Mobile App">Mobile App</SelectItem>
-                      <SelectItem value="SaaS Platform">SaaS Platform</SelectItem>
-                      <SelectItem value="Tool">Tool</SelectItem>
-                      <SelectItem value="Website">Website</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="image">Project Image URL</Label>
+                  <Input
+                    id="image"
+                    value={formData.image || ""}
+                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                    placeholder="https://example.com/image.png"
+                  />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value: any) => setFormData({ ...formData, status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Published">Published</SelectItem>
-                      <SelectItem value="Draft">Draft</SelectItem>
-                      <SelectItem value="Archived">Archived</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="link">Project Link</Label>
+                  <Input
+                    id="link"
+                    value={formData.link || ""}
+                    onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                    placeholder="https://example.com or https://github.com/..."
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="websiteUrl">Website URL</Label>
+                  <Label htmlFor="order">Display Order</Label>
                   <Input
-                    id="websiteUrl"
-                    value={formData.websiteUrl}
-                    onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
-                    placeholder="https://example.com"
+                    id="order"
+                    type="number"
+                    value={formData.order || 0}
+                    onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                    placeholder="0"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="githubUrl">GitHub URL</Label>
-                  <Input
-                    id="githubUrl"
-                    value={formData.githubUrl}
-                    onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
-                    placeholder="https://github.com/..."
+                <div className="flex items-center space-x-2 pt-6">
+                  <Checkbox
+                    id="featured"
+                    checked={formData.featured || false}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, featured: checked as boolean })
+                    }
                   />
+                  <Label htmlFor="featured">Featured Project</Label>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="videoUrl">Video URL (Optional)</Label>
-                <Input
-                  id="videoUrl"
-                  value={formData.videoUrl}
-                  onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                  placeholder="https://youtube.com/..."
-                />
               </div>
 
               <div className="space-y-2">
@@ -262,7 +295,7 @@ export default function AdminProjects() {
                   <Button type="button" onClick={addTechnology}>Add</Button>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.technologies?.map((tech) => (
+                  {formData.tags?.map((tech) => (
                     <Badge key={tech} variant="secondary" className="flex items-center gap-1">
                       {tech}
                       <button onClick={() => removeTechnology(tech)} className="hover:text-destructive">
@@ -273,16 +306,6 @@ export default function AdminProjects() {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="featured"
-                  checked={formData.featured}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, featured: checked as boolean })
-                  }
-                />
-                <Label htmlFor="featured">Featured Project</Label>
-              </div>
 
               <Button type="submit" className="w-full">
                 {editingId ? "Update" : "Add"} Project
@@ -293,7 +316,23 @@ export default function AdminProjects() {
       </motion.div>
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-        {projects.length === 0 ? (
+        {loading ? (
+          <motion.div
+            className="md:col-span-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+                <p className="text-sm text-muted-foreground text-center">
+                  Loading projects...
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : projects.length === 0 ? (
           <motion.div
             className="md:col-span-2"
             initial={{ opacity: 0, y: 20 }}
@@ -313,7 +352,7 @@ export default function AdminProjects() {
           <AnimatePresence mode="popLayout">
             {projects.map((proj, index) => (
               <motion.div
-                key={proj._id}
+                key={proj.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9 }}
@@ -330,8 +369,8 @@ export default function AdminProjects() {
                         <Badge variant="default" className="text-xs">Featured</Badge>
                       )}
                     </div>
-                    <CardDescription>{proj.projectType}</CardDescription>
-                    <Badge variant="outline" className="text-xs">{proj.status}</Badge>
+                    <CardDescription>Order: {proj.order}</CardDescription>
+                    <Badge variant="outline" className="text-xs">Published</Badge>
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => handleEdit(proj)}>
@@ -340,7 +379,7 @@ export default function AdminProjects() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(proj._id)}
+                      onClick={() => handleDelete(proj.id)}
                       className="text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -350,9 +389,9 @@ export default function AdminProjects() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm mb-3 line-clamp-3">{proj.description}</p>
-                {proj.technologies && proj.technologies.length > 0 && (
+                {proj.tags && proj.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {proj.technologies.map((tech) => (
+                    {proj.tags.map((tech) => (
                       <Badge key={tech} variant="secondary" className="text-xs">
                         {tech}
                       </Badge>
@@ -360,9 +399,8 @@ export default function AdminProjects() {
                   </div>
                 )}
                 <div className="flex gap-2 text-xs text-muted-foreground">
-                  {proj.websiteUrl && <span>🌐 Website</span>}
-                  {proj.githubUrl && <span>📦 GitHub</span>}
-                  {proj.videoUrl && <span>🎥 Video</span>}
+                  {proj.link && <span>🔗 Link</span>}
+                  {proj.image && <span>🖼️ Image</span>}
                 </div>
               </CardContent>
             </Card>

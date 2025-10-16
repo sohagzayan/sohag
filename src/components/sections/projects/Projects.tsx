@@ -1,5 +1,6 @@
 "use client";
 
+import { useProjects } from "@/hooks/use-projects";
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
 import { BsCloud, BsFillPeopleFill, BsStarFill } from "react-icons/bs";
@@ -817,6 +818,7 @@ const ProjectDetailsModal = ({ project, isOpen, onClose }: { project: Project | 
 const Projects = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { projects: dbProjects, loading, error, refetch } = useProjects();
 
   const openProjectDetails = (project: Project) => {
     setSelectedProject(project);
@@ -827,6 +829,58 @@ const Projects = () => {
     setIsModalOpen(false);
     setTimeout(() => setSelectedProject(null), 300);
   };
+
+  // Transform database projects to component format
+  const transformProject = (dbProject: any): Project => {
+    const getGradient = (title: string) => {
+      const gradients = [
+        "from-blue-500 to-purple-600",
+        "from-green-500 to-teal-600",
+        "from-orange-500 to-red-600",
+        "from-purple-500 to-pink-600",
+        "from-indigo-500 to-blue-600",
+        "from-yellow-500 to-orange-600",
+      ];
+      const hash = title.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+      return gradients[Math.abs(hash) % gradients.length];
+    };
+
+    const getLogoFileName = (title: string) => {
+      const logoMap: Record<string, string> = {
+        "Samtax": "samtax.svg",
+        "SFB": "sfb.svg",
+        "Gradients CSS": "gradientscss.png",
+        "Barber Academy": "barber.svg",
+        "NAJ Training Center": "ptit.png",
+      };
+      return logoMap[title] || "placeholder.svg";
+    };
+
+    return {
+      id: dbProject._id,
+      title: dbProject.title,
+      description: dbProject.description,
+      detailedDescription: dbProject.description, // Use same description for now
+      type: dbProject.projectType,
+      website: dbProject.websiteUrl || "",
+      github: dbProject.githubUrl,
+      technologies: dbProject.technologies || [],
+      status: dbProject.status,
+      featured: dbProject.featured,
+      created: new Date(dbProject.createdAt).toLocaleDateString(),
+      updated: new Date(dbProject.updatedAt).toLocaleDateString(),
+      logoFileName: getLogoFileName(dbProject.title),
+      screenshotUrl: dbProject.images?.[0] || undefined,
+      gradient: getGradient(dbProject.title),
+      stats: { views: 0, likes: 0, feedbacks: 0 },
+      highlights: [] // Could be added to database schema later
+    };
+  };
+
+  const projects = dbProjects.map(transformProject);
 
   return (
     <section data-slot="panel" id="projects" className="py-16 relative overflow-hidden">
@@ -882,10 +936,36 @@ const Projects = () => {
           </motion.div>
         </div>
 
-        {/* Bento Grid Layout */}
-        <div className="px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-            {projectsData.map((project, index) => (
+        {/* Loading State */}
+        {loading && (
+          <div className="px-4 py-16">
+            <div className="flex justify-center items-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <span className="ml-3 text-lg">Loading projects...</span>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="px-4 py-16">
+            <div className="text-center">
+              <p className="text-red-500 mb-4">{error}</p>
+              <button
+                onClick={refetch}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Projects Grid */}
+        {!loading && !error && (
+          <div className="px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+              {projects.map((project, index) => (
               <div
                 key={project.id}
                 className={
@@ -905,6 +985,7 @@ const Projects = () => {
             ))}
           </div>
         </div>
+        )}
 
         {/* CTA */}
         <motion.div

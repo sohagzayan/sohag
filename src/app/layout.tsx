@@ -6,6 +6,8 @@ import Navbar from "@/components/layout/Navbar";
 import BackgroundEffect from "@/components/ui/backgroundEffect";
 import { CustomDialogProvider } from "@/components/ui/custom-dialog";
 import FloatingActionButton from "@/components/ui/FloatingActionButton";
+import { PagePreloader } from "@/components/ui/PagePreloader";
+import { GlobalLoadingOverlay, LoadingProvider } from "@/contexts/loading-context";
 import { domain, email, webImage, websitePath } from "@/data/Links";
 import { ThemeProvider } from "@/theme/theme-provider";
 import { Analytics } from "@vercel/analytics/react";
@@ -146,15 +148,19 @@ export default function RootLayout({
         <SpeedInsights />
         <Analytics />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <CustomDialogProvider />
-          <Toaster />
-          <Navbar />
-          <BackgroundEffect />
-          <main className="z-40 max-md:z-30 mx-auto w-full max-w-full overflow-x-hidden">
-            {children}
-          </main>
-          <Footer />
-          <FloatingActionButton threshold={400} />
+          <LoadingProvider>
+            <PagePreloader />
+            <CustomDialogProvider />
+            <Toaster />
+            <GlobalLoadingOverlay />
+            <Navbar />
+            <BackgroundEffect />
+            <main className="z-40 max-md:z-30 mx-auto w-full max-w-full overflow-x-hidden">
+              {children}
+            </main>
+            <Footer />
+            <FloatingActionButton threshold={400} />
+          </LoadingProvider>
         </ThemeProvider>
       </body>
     </html>

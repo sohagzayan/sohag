@@ -2,9 +2,9 @@
 
 import AboutSection from "@/components/sections/about/AboutSection";
 import PostSection from "@/components/sections/blog/PostSection";
-import WorkExperienceSection from "@/components/sections/experience/WorkExperienceSection";
 import HeroSection from "@/components/sections/hero/HeroSection";
-import Projects from "@/components/sections/projects/Projects";
+import { OptimizedExperience } from "@/components/sections/optimized/OptimizedExperience";
+import { OptimizedProjects } from "@/components/sections/optimized/OptimizedProjects";
 import RecommendationsSection from "@/components/sections/recommendations/RecommendationsSection";
 import SkillsSection from "@/components/sections/skills/SkillsSection";
 import { Button } from "@/components/ui";
@@ -31,11 +31,11 @@ export default function HomePage() {
       </div>
 
       <div id="work" className="py-4 border-t mt-6">
-        <WorkExperienceSection />
+        <OptimizedExperience />
       </div>
 
       <div id="projects" className="py-4 border-t mt-6">
-        <Projects />
+        <OptimizedProjects />
       </div>
 
 
