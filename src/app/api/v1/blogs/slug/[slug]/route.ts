@@ -8,11 +8,12 @@ import prisma from '@/lib/prisma';
 // GET /api/v1/blogs/slug/[slug] - Get blog by slug
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const { slug } = await params;
     const blog = await prisma.blog.findUnique({
-      where: { slug: params.slug },
+      where: { slug },
     });
 
     if (!blog) {
@@ -21,7 +22,7 @@ export async function GET(
 
     // Increment views
     await prisma.blog.update({
-      where: { slug: params.slug },
+      where: { slug },
       data: { views: { increment: 1 } },
     });
 

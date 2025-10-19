@@ -423,6 +423,31 @@
     @apply w-full max-w-xl py-2 text-base text-[var(--paragraph)] max-md:max-w-none leading-relaxed;
   }
 
+  /* Blog specific styles */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Smooth transitions for blog cards */
+  .blog-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .blog-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
   .main-navbar {
     @apply flex w-full flex-row items-center justify-between rounded-3xl py-3 max-md:m-auto max-md:border-b max-md:border-none max-md:px-0 max-md:backdrop-blur-2xl;
   }

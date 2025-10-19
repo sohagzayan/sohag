@@ -8,11 +8,12 @@ import prisma from '@/lib/prisma';
 // GET /api/v1/projects/[id]
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const project = await prisma.project.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     if (!project) {
@@ -29,13 +30,14 @@ export async function GET(
 // PUT /api/v1/projects/[id]
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
 
     const project = await prisma.project.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         title: body.title,
         description: body.description,
@@ -62,11 +64,12 @@ export async function PUT(
 // DELETE /api/v1/projects/[id]
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.project.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     return successResponse(null, 'Project deleted successfully');

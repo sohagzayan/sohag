@@ -23,7 +23,7 @@ export async function GET(
 
     // Increment views
     await prisma.blog.update({
-      where: { id: params.id },
+      where: { id },
       data: { views: { increment: 1 } },
     });
 
@@ -37,16 +37,17 @@ export async function GET(
 // PUT /api/v1/blogs/[id]
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
 
     // Recalculate read time if content changed
     const readTime = body.content ? calculateReadTime(body.content) : undefined;
 
     const blog = await prisma.blog.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         title: body.title,
         slug: body.slug,
@@ -77,11 +78,12 @@ export async function PUT(
 // DELETE /api/v1/blogs/[id]
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.blog.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return successResponse(null, 'Blog post deleted successfully');

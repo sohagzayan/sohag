@@ -8,11 +8,12 @@ import prisma from '@/lib/prisma';
 // GET /api/v1/social-links/[id]
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const link = await prisma.socialLink.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     if (!link) {
@@ -29,13 +30,14 @@ export async function GET(
 // PUT /api/v1/social-links/[id]
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
 
     const link = await prisma.socialLink.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         name: body.name,
         platform: body.platform,
@@ -61,11 +63,12 @@ export async function PUT(
 // DELETE /api/v1/social-links/[id]
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.socialLink.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     return successResponse(null, 'Social link deleted successfully');

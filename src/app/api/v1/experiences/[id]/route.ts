@@ -8,11 +8,12 @@ import prisma from '@/lib/prisma';
 // GET /api/v1/experiences/[id]
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const experience = await prisma.experience.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     if (!experience) {
@@ -29,13 +30,14 @@ export async function GET(
 // PUT /api/v1/experiences/[id]
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
 
     const experience = await prisma.experience.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         company: body.company,
         position: body.position,
@@ -64,11 +66,12 @@ export async function PUT(
 // DELETE /api/v1/experiences/[id]
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.experience.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     return successResponse(null, 'Experience deleted successfully');

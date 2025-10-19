@@ -8,11 +8,12 @@ import prisma from '@/lib/prisma';
 // GET /api/v1/contact/[id]
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const contactRequest = await prisma.contactRequest.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!contactRequest) {
@@ -29,13 +30,14 @@ export async function GET(
 // PUT /api/v1/contact/[id] - Update contact request status
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
 
     const contactRequest = await prisma.contactRequest.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         status: body.status,
         replied: body.replied,
@@ -58,11 +60,12 @@ export async function PUT(
 // DELETE /api/v1/contact/[id]
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.contactRequest.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return successResponse(null, 'Contact request deleted successfully');
