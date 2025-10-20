@@ -22,6 +22,33 @@
 @plugin "@tailwindcss/typography";
 
 @layer base {
+  /* Ensure proper cursor styles for interactive elements */
+  button, 
+  [role="button"], 
+  a, 
+  input[type="button"], 
+  input[type="submit"], 
+  input[type="reset"],
+  .cursor-pointer {
+    cursor: pointer;
+  }
+  
+  input[type="text"], 
+  input[type="email"], 
+  input[type="password"], 
+  textarea,
+  .cursor-text {
+    cursor: text;
+  }
+  
+  .cursor-not-allowed {
+    cursor: not-allowed;
+  }
+  
+  .cursor-default {
+    cursor: default;
+  }
+
   :root {
     --background: #16161a;
     --headline: #fffffe;

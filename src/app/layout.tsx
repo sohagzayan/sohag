@@ -17,13 +17,13 @@ import { Toaster } from "sonner";
 export const metadata: Metadata = {
   metadataBase: new URL(`https://${domain}`),
   title: {
-    template: "%s | Baraa Alshaer - Full Stack Developer",
-    default: "Baraa Alshaer - Full Stack Developer & Portfolio",
+    template: "%s | Sohag Hossain - Full Stack Developer",
+    default: "Sohag Hossain - Full Stack Developer & Portfolio",
   },
   description:
-    "Explore the portfolio of Baraa Alshaer, Full Stack Developer specializing in React, Node.js, TypeScript, and modern web technologies. View projects, experience, and contact details.",
+    "Explore the portfolio of Sohag Hossain, Full Stack Developer specializing in React, Node.js, TypeScript, and modern web technologies. View projects, experience, and contact details.",
   keywords: [
-    "Baraa Alshaer",
+    "Sohag Hossain",
     "Full Stack Developer",
     "React Developer",
     "Node.js Developer",
@@ -45,9 +45,9 @@ export const metadata: Metadata = {
     "AI Integration",
     "Remote Work",
   ].join(", "),
-  authors: [{ name: "Baraa Alshaer", url: websitePath.main }],
-  creator: "Baraa Alshaer",
-  publisher: "Baraa Alshaer",
+  authors: [{ name: "Sohag Hossain", url: websitePath.main }],
+  creator: "Sohag Hossain",
+  publisher: "Sohag Hossain",
   alternates: {
     canonical: websitePath.main,
     languages: {
@@ -59,17 +59,17 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     alternateLocale: "ar_SA",
-    title: "Baraa Alshaer - Full Stack Developer Portfolio",
+    title: "Sohag Hossain - Full Stack Developer Portfolio",
     description:
-      "Discover the work and experience of Baraa Alshaer, a passionate Full Stack Developer. Projects, skills, and contact info included.",
+      "Discover the work and experience of Sohag Hossain, a passionate Full Stack Developer. Projects, skills, and contact info included.",
     url: websitePath.main,
-    siteName: "Baraa Alshaer Portfolio",
+    siteName: "Sohag Hossain Portfolio",
     images: [
       {
         url: webImage,
         width: 400,
         height: 400,
-        alt: "Baraa Alshaer Portfolio Preview",
+        alt: "Sohag Hossain Portfolio Preview",
       },
     ],
     countryName: "Palestine",
@@ -77,11 +77,11 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Baraa Alshaer - Full Stack Developer Portfolio",
+    title: "Sohag Hossain - Full Stack Developer Portfolio",
     description:
-      "Explore the portfolio of Baraa Alshaer, Full Stack Developer. Projects, experience, and contact details.",
+      "Explore the portfolio of Sohag Hossain, Full Stack Developer. Projects, experience, and contact details.",
     images: webImage,
-    creator: "@balshaer",
+    creator: "@sohaghossain",
   },
   robots: {
     index: true,
@@ -117,25 +117,25 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        <meta name="apple-mobile-web-app-title" content="Baraa" />
+        <meta name="apple-mobile-web-app-title" content="Sohag" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Person",
-              name: "Baraa Alshaer",
+              name: "Sohag Hossain",
               url: websitePath.main,
               image: webImage,
               sameAs: [
-                "https://github.com/balshaer",
-                "https://www.linkedin.com/in/balshaer/",
-                "https://www.youtube.com/@Codewithbaraa",
+                "https://github.com/sohaghossain",
+                "https://www.linkedin.com/in/sohaghossain/",
+                "https://www.youtube.com/@sohaghossain",
               ],
               jobTitle: "Full Stack Developer",
               worksFor: {
                 "@type": "Organization",
-                name: "Samtax",
+                name: "Freelance",
               },
               description:
                 "Full Stack Developer with expertise in React, Node.js, TypeScript, and more.",

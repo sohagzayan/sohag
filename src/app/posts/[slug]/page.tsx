@@ -55,24 +55,32 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const post = await prisma.blog.findUnique({
-    where: { slug, published: true },
-  });
+  
+  try {
+    const post = await prisma.blog.findUnique({
+      where: { slug, published: true },
+    });
 
-  if (!post) {
+    if (!post) {
+      notFound();
+    }
+
+    return (
+      <div className="min-h-screen pt-24 pb-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <BlogPostDetail post={post} />
+          </div>
+          
+          {/* Related Posts */}
+          <div className="max-w-6xl mx-auto mt-12">
+            <RelatedPosts currentPostId={post.id} limit={4} />
+          </div>
+        </div>
+      </div>
+    );
+  } catch (error) {
+    console.error('Error fetching blog post:', error);
     notFound();
   }
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <BlogPostDetail post={post} />
-      </div>
-      
-      {/* Related Posts */}
-      <div className="max-w-6xl mx-auto mt-12">
-        <RelatedPosts currentPostId={post.id} limit={4} />
-      </div>
-    </div>
-  );
 }

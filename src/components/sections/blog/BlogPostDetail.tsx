@@ -49,13 +49,20 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
         if (response.ok) {
           const data = await response.json();
           setLocalViews(data.views);
+        } else {
+          console.error("Failed to track view");
         }
       } catch (error) {
         console.error("Error tracking view:", error);
       }
     };
 
-    trackView();
+    // Only track view once per session
+    const hasTracked = sessionStorage.getItem(`viewed-${post.id}`);
+    if (!hasTracked) {
+      trackView();
+      sessionStorage.setItem(`viewed-${post.id}`, 'true');
+    }
   }, [post.id]);
 
   const handleLike = async () => {
@@ -72,6 +79,8 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
         const data = await response.json();
         setLocalLikes(data.likes);
         setIsLiked(!isLiked);
+      } else {
+        console.error("Failed to update likes");
       }
     } catch (error) {
       console.error("Error updating likes:", error);
@@ -136,9 +145,9 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
       <div className="mb-6">
         <Link
           href="/posts"
-          className="inline-flex items-center gap-2 text-[var(--link-color)] hover:underline"
+          className="inline-flex items-center gap-2 text-[var(--link-color)] hover:text-[var(--link-color)]/80 hover:underline transition-all duration-200 cursor-pointer group"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-200" />
           Back to Posts
         </Link>
       </div>
@@ -151,6 +160,12 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
               src={post.coverImage}
               alt={post.title}
               className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+              }}
             />
             {post.featured && (
               <div className="absolute top-4 left-4">
@@ -210,13 +225,14 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
         <div className="flex items-center gap-4 mb-8">
           <motion.button
             onClick={handleLike}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer ${
               isLiked
-                ? "bg-red-50 text-red-600 border border-red-200"
-                : "bg-[var(--card-background)] text-[var(--paragraph)] border border-[var(--card-border-color)] hover:bg-[var(--card-hover)]"
+                ? "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+                : "bg-[var(--card-background)] text-[var(--paragraph)] border border-[var(--card-border-color)] hover:bg-[var(--card-hover)] hover:border-[var(--link-color)]/30"
             }`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            disabled={false}
           >
             <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
             <span>{localLikes} likes</span>
@@ -224,9 +240,10 @@ export default function BlogPostDetail({ post }: BlogPostDetailProps) {
 
           <motion.button
             onClick={handleShare}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-[var(--card-background)] text-[var(--paragraph)] border border-[var(--card-border-color)] hover:bg-[var(--card-hover)] transition-all duration-200"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-[var(--card-background)] text-[var(--paragraph)] border border-[var(--card-border-color)] hover:bg-[var(--card-hover)] hover:border-[var(--link-color)]/30 transition-all duration-200 cursor-pointer"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            disabled={false}
           >
             <Share2 className="h-5 w-5" />
             <span>Share</span>

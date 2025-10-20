@@ -130,7 +130,7 @@ export default function SimpleBlogGrid() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
         >
-          <Card className="group blog-card bg-[var(--card-background)] border-[var(--card-border-color)] hover:border-[var(--link-color)]/30">
+          <Card className="group blog-card bg-[var(--card-background)] border-[var(--card-border-color)] hover:border-[var(--link-color)]/30 transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-[var(--link-color)]/10">
             <CardContent className="p-0">
               {/* Cover Image */}
               <div className="relative h-48 overflow-hidden rounded-t-lg">
@@ -139,6 +139,20 @@ export default function SimpleBlogGrid() {
                     src={post.coverImage}
                     alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                            <span class="text-white text-2xl font-bold">${post.title.charAt(0)}</span>
+                          </div>
+                        `;
+                      }
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -206,7 +220,7 @@ export default function SimpleBlogGrid() {
                 {/* Read More Link */}
                 <Link
                   href={`/posts/${post.slug}`}
-                  className="inline-flex items-center gap-2 text-[var(--link-color)] hover:text-[var(--link-color)]/80 font-medium text-sm transition-colors group/link"
+                  className="inline-flex items-center gap-2 text-[var(--link-color)] hover:text-[var(--link-color)]/80 font-medium text-sm transition-colors group/link cursor-pointer"
                 >
                   Read More
                   <ArrowRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
