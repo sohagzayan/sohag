@@ -129,18 +129,18 @@ export function useProjects(
         // Apply additional filters that aren't handled by the API
         if (options.status) {
           transformedProjects = transformedProjects.filter(
-            (project) => project.status === options.status
+            (project: Project) => project.status === options.status
           );
         }
 
         if (options.publishedOnly !== false) {
           transformedProjects = transformedProjects.filter(
-            (project) => project.status === "Published"
+            (project: Project) => project.status === "Published"
           );
         }
 
         // Sort by order and creation date
-        transformedProjects.sort((a, b) => {
+        transformedProjects.sort((a: Project, b: Project) => {
           // First sort by order if available, then by creation date
           const orderA = (data.data.find((p: DatabaseProject) => p.id === a._id)?.order || 0);
           const orderB = (data.data.find((p: DatabaseProject) => p.id === b._id)?.order || 0);

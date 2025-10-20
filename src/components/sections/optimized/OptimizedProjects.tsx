@@ -78,7 +78,7 @@ const ProjectCard3D = ({ project, index, onDetailsClick }: { project: any; index
   const cardRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const [localStats, setLocalStats] = useState(project.stats || { views: 0, likes: 0, feedbacks: 0 });
+  const [localStats, setLocalStats] = useState<{ views: number; likes: number; feedbacks: number }>(project.stats || { views: 0, likes: 0, feedbacks: 0 });
   const [isLiked, setIsLiked] = useState(false);
 
   const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [7, -7]), { stiffness: 300, damping: 30 });

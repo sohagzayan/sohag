@@ -11,7 +11,6 @@ type Skill = {
   category: string;
   level: number;
   icon?: string;
-  order: number;
 };
 
 type SkillCategory = {
@@ -156,7 +155,6 @@ export default function SkillsSection() {
           </h3>
           <SkillsList 
             skills={skills
-              .sort((a, b) => a.order - b.order) // Sort by order field
               .map((s) => s.name)
             } 
             iconMap={skillIconMap} 

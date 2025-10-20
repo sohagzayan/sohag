@@ -2,7 +2,7 @@
 
 import { useExperiences } from "@/hooks/use-experiences";
 import { useEffect, useState } from "react";
-import { ExperienceItemType, WorkExperience } from "../../ui/work-experience";
+import { ExperienceItemType, ExperiencePositionIconType, WorkExperience } from "../../ui/work-experience";
 
 export default function WorkSection() {
   const { experiences: dbExperiences, loading: isLoading, error: fetchError, refetch } = useExperiences();
@@ -35,7 +35,7 @@ export default function WorkSection() {
         };
 
         // Determine icon based on position/company
-        const getIcon = (position: string, company: string) => {
+        const getIcon = (position: string, company: string): ExperiencePositionIconType => {
           if (position.includes("Security") || position.includes("Database")) return "security";
           if (company.includes("University") || position.includes("Education")) return "education";
           return "code";

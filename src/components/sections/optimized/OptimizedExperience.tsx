@@ -2,25 +2,7 @@
 
 import { useInstantExperiences } from "@/hooks/use-instant-data";
 import { motion } from "framer-motion";
-import { WorkExperience } from "../../ui/work-experience";
-
-interface ExperienceItemType {
-  id: string;
-  companyName: string;
-  companyLogo?: string;
-  isCurrentEmployer: boolean;
-  positions: Array<{
-    id: string;
-    title: string;
-    employmentPeriod: string;
-    employmentType: string;
-    description: string;
-    icon: string;
-    skills: string[];
-    location: string;
-    isExpanded: boolean;
-  }>;
-}
+import { ExperienceItemType, ExperiencePositionIconType, WorkExperience } from "../../ui/work-experience";
 
 // Transform database experience to UI format
 function transformExperienceToUI(dbExperience: any): ExperienceItemType {
@@ -47,7 +29,7 @@ function transformExperienceToUI(dbExperience: any): ExperienceItemType {
   };
 
   // Determine icon based on position/company
-  const getIcon = (position: string, company: string) => {
+  const getIcon = (position: string, company: string): ExperiencePositionIconType => {
     if (position.includes("Security") || position.includes("Database")) return "security";
     if (company.includes("University") || position.includes("Education")) return "education";
     return "code";
